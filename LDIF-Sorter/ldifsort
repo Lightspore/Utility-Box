@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -u
 
 # check user passed in ldif file
 if [ $# -ne 2 ]
@@ -15,18 +15,20 @@ then
   exit 1
 fi
 
-> $2
+sortedfile=$(realpath "$2")
+
+> $sortedfile
 if [ $? -ne 0 ]
 then
-  echo "$2 is not writable!"
+  echo "$sortedfile is not writable!"
   exit 1
 fi
 
 buffer=""
 outfile=""
 
-# Remove old temporary files
-rm *.tmp
+# Make temporary workspace
+cd "$(mktemp -d)"
 
 while read line
 do
@@ -47,7 +49,7 @@ $line" >> $outfile
       # Store in buffer, part of next entry
       buffer="$buffer
 $line"
-    else      
+    else
       # Newline marks end of current entry
       if [[ $line == "" ]]
       then
@@ -55,7 +57,7 @@ $line"
         outfile=""
       else
         # Part of current entry
-        echo $line >> $outfile  
+        echo $line >> $outfile
       fi
     fi
   fi
@@ -63,7 +65,10 @@ done < $1
 
 for outfile in $(ls *.tmp | sort)
 do
-  cat $outfile >> $2 
+  cat $outfile >> $sortedfile
 done
 
-echo $buffer >> $2
+echo $buffer >> $sortedfile
+
+# Clean up
+rm -r $PWD
