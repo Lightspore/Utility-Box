@@ -9,7 +9,7 @@ LIMIT=7
 CWAIT=5
 
 # Variables [CHANGE]
-cVars=("A,1" "B,2" "C,3" "D,4" "E,5" "F,6" "G,7" "H,8" "I,9" "J,10" "K,11")
+userVars=("A,1" "B,2" "C,3" "D,4" "E,5" "F,6" "G,7" "H,8" "I,9" "J,10" "K,11")
 
 userCode () {
     local userVar=$1
@@ -68,7 +68,7 @@ echo $LIMIT > lock
 
 N=0
 
-for cVar in ${cVars[@]}
+for cVar in ${userVars[@]}
 do
     [ $DEBUG -eq 1 ] && echo "Parent PID $$ $BASHPID: $cVar"
     cRun "$cVar" &
