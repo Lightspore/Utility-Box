@@ -5,7 +5,7 @@ DEBUG=1
 
 # Spawn limit
 LIMIT=7
-# Wait time
+# Wait timer before check for room to spawn
 PSWAIT=5
 
 # Variables
