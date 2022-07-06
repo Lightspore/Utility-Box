@@ -1,26 +1,31 @@
 #!/bin/bash
 
-# Debug mode
+# Debug mode [CHANGE]
 DEBUG=1
 
-# Spawn limit
+# Spawn limit [CHANGE]
 LIMIT=7
-# Wait timer before check for room to spawn
-PSWAIT=5
+# Wait timer before check for room to spawn [CHANGE]
+CWAIT=5
 
-# Variables
-N=0
-psVars=("A,1" "B,2" "C,3" "D,4" "E,5" "F,6" "G,7" "H,8" "I,9" "J,10" "K,11")
+# Variables [CHANGE]
+cVars=("A,1" "B,2" "C,3" "D,4" "E,5" "F,6" "G,7" "H,8" "I,9" "J,10" "K,11")
 
-# Make temporary workspace
-cd "$(mktemp -d)"
+userCode () {
+    local userVar=$1
 
-# Make lock file
-#: >> lock
-echo $LIMIT > lock
+    #### Replace this section with your code ###
+    echo "PID $BASHPID: running - userVar($userVar)"
+    sleep 15
+    echo "PID $BASHPID: finished"
+    ############################################
+}
 
-psRun () {
-    local psVar=$1
+##################################################################################
+######################### DO NOT CHANGE BEYOND THIS LINE #########################
+##################################################################################
+cRun () {
+    local cVar=$1
 
     while :
     do
@@ -37,14 +42,10 @@ psRun () {
             fi
         } {fd}<lock
         flock -u $fd
-        sleep $PSWAIT
+        sleep $CWAIT
     done
 
-    #### Replace this section with your code ###
-    echo "PID $BASHPID: running - psVar($psVar)"
-    sleep 15
-    echo "PID $BASHPID: finished"
-    ############################################
+    userCode $cVar
 
     {
     flock $fd
@@ -58,15 +59,24 @@ psRun () {
     exit 0
 }
 
-for psVar in ${psVars[@]}
+# Make temporary workspace
+cd "$(mktemp -d)"
+
+# Make lock file
+#: >> lock
+echo $LIMIT > lock
+
+N=0
+
+for cVar in ${cVars[@]}
 do
-    [ $DEBUG -eq 1 ] && echo "Parent PID $$ $BASHPID: $psVar"
-    psRun "$psVar" &
+    [ $DEBUG -eq 1 ] && echo "Parent PID $$ $BASHPID: $cVar"
+    cRun "$cVar" &
 done
 
 until [ $N -eq $LIMIT ]
 do
-    sleep $((PSWAIT * 2))
+    sleep $((CWAIT * 2))
     {
     flock $fd
         N=$(head -1 lock)
