@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Debug mode [CHANGE]
-DEBUG=1
+DEBUG=0
 
 # Spawn limit [CHANGE]
 LIMIT=7
@@ -63,10 +63,7 @@ cRun () {
 cd "$(mktemp -d)"
 
 # Make lock file
-#: >> lock
 echo $LIMIT > lock
-
-N=0
 
 for cVar in ${userVars[@]}
 do
@@ -74,16 +71,7 @@ do
     cRun "$cVar" &
 done
 
-until [ $N -eq $LIMIT ]
-do
-    sleep $((CWAIT * 2))
-    {
-    flock $fd
-        N=$(head -1 lock)
-        [ $DEBUG -eq 1 ] && echo "Parent PID $$ $BASHPID: N($N)"
-    } {fd}<lock
-    flock -u $fd
-done
+wait
 
 # Clean up
 rm -r $PWD
