@@ -1,0 +1,76 @@
+#!/bin/bash
+
+# Spawn limit
+N=7
+# Wait time
+WAIT=10
+
+# Variables
+psVars=("A,1" "B,2" "C,3" "D,4" "E,5" "F,6" "G,7" "H,8" "I,9" "J,10" "K,11")
+
+# Make temporary workspace
+cd "$(mktemp -d)"
+
+# Make lock file
+#: >> lock
+echo $N > lock
+
+psRun () {
+    local psVar=$1
+    local fd
+    local N
+
+    while :
+    do
+        {
+        flock $fd
+            N=$(head -1 lock)
+            if [ $N -gt 0 ]
+            then
+                echo "PID $BASHPID: Take 1 from N($N)"
+                ((N--))
+                echo $N > lock
+                flock -u $fd
+                break
+            fi
+        } {fd}<lock
+        flock -u $fd
+        sleep $WAIT
+    done
+
+    echo "PID $BASHPID: running - psVar($psVar)"
+    sleep 5
+    echo "PID $BASHPID: finished"
+
+    {
+    flock $fd
+        N=$(head -1 lock)
+        echo "PID $BASHPID: Give 1 to N($N)"
+        ((N++))
+        echo $N > lock
+    } {fd}<lock
+    flock -u $fd
+}
+
+for psVar in ${psVars[@]}
+do
+    echo "Parent PID $$ $BASHPID: $psVar"
+    psRun "$psVar" &
+done
+
+[ $BASHPID -ne $$ ] || exit 0
+
+N=0
+until [ $N -eq 7 ]
+do
+    sleep $WAIT
+    {
+    flock $fd
+        N=$(head -1 lock)
+        echo "Parent PID $$ $BASHPID: N($N)"
+    } {fd}<lock
+    flock -u $fd
+done
+
+# Clean up
+rm -r $PWD
