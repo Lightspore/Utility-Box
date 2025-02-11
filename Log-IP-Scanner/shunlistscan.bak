@@ -1,6 +1,5 @@
 #!/bin/bash
 
-# MS NPS RADIUS log IP scan
 
 if [ -z "$1" ]
   then
@@ -8,7 +7,7 @@ if [ -z "$1" ]
 	exit 1
 fi
 
-data=$(grep "Calling Station Identifier:" $1 | sort -n | cut -d ":" -f2 | uniq -c | awk '$1 >= 10' | awk '{$1=$1};1')
+data=$(grep "shun (" $1 | cut -d " " -f3 | sort -n | uniq -c | awk '{$1=$1};1')
 
 # Iterate over each line of data and print it
 echo "What we are seeing:"

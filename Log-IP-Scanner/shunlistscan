@@ -1,5 +1,6 @@
 #!/bin/bash
 
+# Cisco FTD shun IP list scan
 
 if [ -z "$1" ]
   then

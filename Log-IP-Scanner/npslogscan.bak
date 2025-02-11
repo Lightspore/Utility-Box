@@ -1,6 +1,5 @@
 #!/bin/bash
 
-# MS NPS RADIUS log IP scan
 
 if [ -z "$1" ]
   then
