@@ -39,7 +39,7 @@ while IFS= read -r line; do
     tempsubnet="$((add1 & lmask1)).$lmask1.$((add2 & lmask2)).$lmask2.$((add3 & lmask3)).$lmask3.$((add4 & lmask4)).$lmask4"
 
     if [[ "$last_cleaned_line" == "$tempsubnet" ]]; then
-      echo "- $cleaned_line $add1.$add2.$add3.$add4/$cidr"
+      echo "-$cleaned_line $add1.$add2.$add3.$add4/$cidr"
     else
       echo "$cleaned_line $add1.$add2.$add3.$add4/$cidr"
     fi
