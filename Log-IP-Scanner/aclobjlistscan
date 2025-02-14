@@ -1,0 +1,50 @@
+#!/bin/bash
+
+# Cisco FTD ACL object IP scan
+
+bitcount() {
+    local num=$1
+    local count=0
+
+    while [ $num -ne 0 ]; do
+      # Increment count if the last bit is 1
+      count=$((count + (num & 1)))
+
+      # Shift bits to the right by 1
+      num=$((num >> 1))
+    done
+    echo $count
+}
+
+if [ -z "$1" ]
+  then
+    echo "Missing argument"
+	exit 1
+fi
+
+data=$(grep "subnet" $1 | cut -d " " -f3,4 | sed 's/ /./g' | awk -v OFS="." -F "." '{print $1,$5,$2,$6,$3,$7,$4,$8}' | sort -n)
+
+last_cleaned_line="0.255.0.255.0.255.0.255"
+
+# Iterate over each line of data and print it
+echo "What we are seeing:"
+while IFS= read -r line; do
+    cleaned_line=$(echo "$line" | sed 's/\r//g')
+
+    IFS='.' read -r add1 mask1 add2 mask2 add3 mask3 add4 mask4 <<< "$cleaned_line"
+    IFS='.' read -r ladd1 lmask1 ladd2 lmask2 ladd3 lmask3 ladd4 lmask4 <<< "$last_cleaned_line"
+
+    cidr=$(( $(bitcount $mask1) + $(bitcount $mask2) + $(bitcount $mask3) + $(bitcount $mask4) ))
+
+    tempsubnet="$((add1 & lmask1)).$lmask1.$((add2 & lmask2)).$lmask2.$((add3 & lmask3)).$lmask3.$((add4 & lmask4)).$lmask4"
+
+    if [[ "$last_cleaned_line" == "$tempsubnet" ]]; then
+      echo "- $cleaned_line $add1.$add2.$add3.$add4/$cidr"
+    else
+      echo "$cleaned_line $add1.$add2.$add3.$add4/$cidr"
+    fi
+
+    last_cleaned_line=$cleaned_line
+done <<< "$data"
+
+
