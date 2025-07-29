@@ -1,0 +1,9 @@
+# run Powershell as Administrator
+
+# Connect with Enhanced Session
+Set-VM -VMName 'Ubuntu 24.04' -EnhancedSessionTransportType HvSocket
+
+# Allow nested virtualisation (optional)
+Set-VMProcessor -VMName 'Ubuntu 24.04' -ExposeVirtualizationExtensions $true
+# Verify - expect 'True'
+(Get-VMProcessor -VMName 'Ubuntu 24.04').ExposeVirtualizationExtensions
