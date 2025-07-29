@@ -1,0 +1,6 @@
+cp -p /etc/default/grub /etc/default/grub.default
+# Show boot log instead of splash screen
+sed -i -e 's/GRUB_CMDLINE_LINUX_DEFAULT=.*/GRUB_CMDLINE_LINUX_DEFAULT=""/g' /etc/default/grub
+# Faster boot - reduce grub wait for input timeout
+echo 'GRUB_RECORDFAIL_TIMEOUT=3' >> /etc/default/grub
+update-grub

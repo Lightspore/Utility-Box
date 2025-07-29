@@ -1,0 +1,15 @@
+apt install -y systemd-zram-generator
+cp -p /etc/systemd/zram-generator.conf /etc/systemd/zram-generator.conf.original
+cat > /etc/systemd/zram-generator.conf <<'EOT'
+[zram0]
+zram-size = 12288
+compression-algorithm = zstd
+EOT
+systemctl daemon-reload
+systemctl restart systemd-zram-setup@zram0
+
+# Disable swap file
+cp -p /etc/fstab /etc/fstab.original
+sed -i -e 's@^/swap.img@#/swap.img@g' /etc/fstab
+swapoff /swap.img
+rm /swap.img
